@@ -1,20 +1,20 @@
-name: Run Spectral on Pull Requests
-
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
+  - push
+  - pull_request
+name: CI
 jobs:
-  build:
-    name: Run Spectral
+  spectralChecks:
+    name: Spectral checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
-      # Run Spectral
-      - uses: stoplightio/spectral-action@v0.7.3
+      - name: Test this action against an incorrect file.
+        id: expect-failure
+        uses: ./
         with:
-          file_glob: 'doc/api/*.yaml'
-          spectral_ruleset: .spectral.yaml
+          file_glob: ./fixtures/*.yml
+          spectral_ruleset: .my-custom.spectral.yml
+        continue-on-error: true
+
+      - if: steps.expect-failure.output.status == 'failure'
+        run: exit 0
